@@ -13,5 +13,22 @@ class User(db.Model):
                                                      unique=True)
     password_hash: sqlorm.Mapped[Optional[str]] = sqlorm.mapped_column(sqla.String(256))
 
+    posts: sqlorm.WriteOnlyMapped['Post'] = sqlorm.relationship(
+        back_populates='author')
+
     def __repr__(self):
         return '<User {}>'.format(self.username)
+
+
+class Post(db.Model):
+    id: sqlorm.Mapped[int] = sqlorm.mapped_column(primary_key=True)
+    body: sqlorm.Mapped[str] = sqlorm.mapped_column(sqla.String(140))
+    timestamp: sqlorm.Mapped[datetime] = sqlorm.mapped_column(
+        index=True, default=lambda: datetime.now(timezone.utc))
+    user_id: sqlorm.Mapped[int] = sqlorm.mapped_column(sqla.ForeignKey(User.id),
+                                                       index=True)
+
+    author: sqlorm.Mapped[User] = sqlorm.relationship(back_populates='posts')
+
+    def __repr__(self):
+        return '<Post {}>'.format(self.body)

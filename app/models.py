@@ -16,9 +16,11 @@ class User(UserMixin, db.Model):
     email: sqlorm.Mapped[str] = sqlorm.mapped_column(sqla.String(120), index=True,
                                                      unique=True)
     password_hash: sqlorm.Mapped[Optional[str]] = sqlorm.mapped_column(sqla.String(256))
-
     posts: sqlorm.WriteOnlyMapped['Post'] = sqlorm.relationship(
         back_populates='author')
+    about_me: sqlorm.Mapped[Optional[str]] = sqlorm.mapped_column(sqla.String(140))
+    last_seen: sqlorm.Mapped[Optional[datetime]] = sqlorm.mapped_column(
+        default=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

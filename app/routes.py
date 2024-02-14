@@ -7,6 +7,14 @@ from app import db
 from app.models import User
 from app.forms import RegistrationForm
 from urllib.parse import urlsplit
+from datetime import datetime, timezone
+
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.now(timezone.utc)
+        db.session.commit()
 
 
 @app.route('/')

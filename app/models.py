@@ -8,6 +8,15 @@ from flask_login import UserMixin
 from app import login
 from hashlib import md5
 
+followers = sqla.Table(
+    'followers',
+    db.metadata,
+    sqla.Column('follower_id', sqla.Integer, sqla.ForeignKey('user.id'),
+                primary_key=True),
+    sqla.Column('followed_id', sqla.Integer, sqla.ForeignKey('user.id'),
+                primary_key=True)
+)
+
 
 class User(UserMixin, db.Model):
     id: sqlorm.Mapped[int] = sqlorm.mapped_column(primary_key=True)
@@ -21,6 +30,14 @@ class User(UserMixin, db.Model):
     about_me: sqlorm.Mapped[Optional[str]] = sqlorm.mapped_column(sqla.String(140))
     last_seen: sqlorm.Mapped[Optional[datetime]] = sqlorm.mapped_column(
         default=lambda: datetime.now(timezone.utc))
+    following: sqlorm.WriteOnlyMapped['User'] = sqlorm.relationship(
+        secondary=followers, primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        back_populates='followers')
+    followers: sqlorm.WriteOnlyMapped['User'] = sqlorm.relationship(
+        secondary=followers, primaryjoin=(followers.c.followed_id == id),
+        secondaryjoin=(followers.c.follower_id == id),
+        back_populates='following')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

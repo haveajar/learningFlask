@@ -48,4 +48,3 @@ class EditProfileForm(FlaskForm):
             user = db.session.scalar(sqla.select(User).where(User.username == self.username.data))
             if user is not None:
                 raise ValidationError('Please use a different username.')
-# TODO: Currently username validation does NOT work!
